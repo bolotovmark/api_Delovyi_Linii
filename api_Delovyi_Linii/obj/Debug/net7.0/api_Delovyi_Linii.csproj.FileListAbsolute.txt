@@ -1,0 +1,15 @@
+/Users/markbolotov/RiderProjects/api_Delovyi_Linii/api_Delovyi_Linii/bin/Debug/net7.0/api_Delovyi_Linii
+/Users/markbolotov/RiderProjects/api_Delovyi_Linii/api_Delovyi_Linii/bin/Debug/net7.0/api_Delovyi_Linii.deps.json
+/Users/markbolotov/RiderProjects/api_Delovyi_Linii/api_Delovyi_Linii/bin/Debug/net7.0/api_Delovyi_Linii.runtimeconfig.json
+/Users/markbolotov/RiderProjects/api_Delovyi_Linii/api_Delovyi_Linii/bin/Debug/net7.0/api_Delovyi_Linii.dll
+/Users/markbolotov/RiderProjects/api_Delovyi_Linii/api_Delovyi_Linii/bin/Debug/net7.0/api_Delovyi_Linii.pdb
+/Users/markbolotov/RiderProjects/api_Delovyi_Linii/api_Delovyi_Linii/obj/Debug/net7.0/api_Delovyi_Linii.csproj.AssemblyReference.cache
+/Users/markbolotov/RiderProjects/api_Delovyi_Linii/api_Delovyi_Linii/obj/Debug/net7.0/api_Delovyi_Linii.GeneratedMSBuildEditorConfig.editorconfig
+/Users/markbolotov/RiderProjects/api_Delovyi_Linii/api_Delovyi_Linii/obj/Debug/net7.0/api_Delovyi_Linii.AssemblyInfoInputs.cache
+/Users/markbolotov/RiderProjects/api_Delovyi_Linii/api_Delovyi_Linii/obj/Debug/net7.0/api_Delovyi_Linii.AssemblyInfo.cs
+/Users/markbolotov/RiderProjects/api_Delovyi_Linii/api_Delovyi_Linii/obj/Debug/net7.0/api_Delovyi_Linii.csproj.CoreCompileInputs.cache
+/Users/markbolotov/RiderProjects/api_Delovyi_Linii/api_Delovyi_Linii/obj/Debug/net7.0/api_Delovyi_Linii.dll
+/Users/markbolotov/RiderProjects/api_Delovyi_Linii/api_Delovyi_Linii/obj/Debug/net7.0/refint/api_Delovyi_Linii.dll
+/Users/markbolotov/RiderProjects/api_Delovyi_Linii/api_Delovyi_Linii/obj/Debug/net7.0/api_Delovyi_Linii.pdb
+/Users/markbolotov/RiderProjects/api_Delovyi_Linii/api_Delovyi_Linii/obj/Debug/net7.0/api_Delovyi_Linii.genruntimeconfig.cache
+/Users/markbolotov/RiderProjects/api_Delovyi_Linii/api_Delovyi_Linii/obj/Debug/net7.0/ref/api_Delovyi_Linii.dll

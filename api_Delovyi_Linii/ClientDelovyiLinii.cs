@@ -70,7 +70,11 @@ namespace api_Delovyi_Linii
             string massStr = mass.ToString(CultureInfo.InvariantCulture);
             string volumeStr = volume.ToString(CultureInfo.InvariantCulture);
             string? firstDate = await GetFirstDate("г. Чайковский, ул. Промышленная, 8/25", massStr, volumeStr);
-
+            if (!cityArrival.Contains(','))
+            {
+                cityArrival += ", Ленина 1";
+            }
+            
             string jsonContent =
                 $"{{\n   \"appkey\":\"{_apiKey}\",\n   \"delivery\":{{\n      \"deliveryType\":{{\n         \"type\":\"auto\"\n      }},\n      \"arrival\":{{\n         \"variant\":\"address\",\n         \"address\":{{\n            " +
                 $"\"search\":\"{cityArrival}\"\n         }},\n        \"time\":{{\n            \"worktimeStart\":\"08:00\",\n            \"worktimeEnd\":\"17:00\"\n         }}\n      }},\n      \"derival\":{{\n        " +

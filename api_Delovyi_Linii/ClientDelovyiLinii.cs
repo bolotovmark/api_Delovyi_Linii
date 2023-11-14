@@ -1,103 +1,36 @@
-using System.Net.Http;
-using System.Reflection;
+using System.Globalization;
 using System.Text;
-using System.Text.Json;
-using api_Delovyi_Linii.TemplateJsonClasses;
+using System.Text.RegularExpressions;
 
 namespace api_Delovyi_Linii
 {
     public class ClientDelovyiLinii
     {
-        private string _login;
-        private string _password;
+ 
         private string _apiKey;
-        private string? _sessionToken;
-        private HttpClient _httpClient;
         
-        
-        public ClientDelovyiLinii(string login, string password, string apiKey)
+        public ClientDelovyiLinii(string apiKey)
         {
-            _login = login;
-            _password = password;
             _apiKey = apiKey;
-            _httpClient = new HttpClient();
-            var t = Task.Run(async () => await Auth());
-            t.Wait();
         }
 
-        private async Task Auth()
+        public async Task<string?> Request(string urlRequest, string jsonRequestData)
         {
-            const string urlAuth = "https://api.dellin.ru/v3/auth/login.json";
-
-            try
-            {
-                using (_httpClient)
-                {
-                
-                    RequestAuth requestData = new RequestAuth(_apiKey, _login, _password);
-                    string jsonData = JsonSerializer.Serialize(requestData);
-
-                    _httpClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-                    var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
-                
-                    HttpResponseMessage response = await _httpClient.PostAsync(urlAuth, content);
-                    //Console.WriteLine(response);
-                    
-                    if (response.IsSuccessStatusCode)
-                    {
-                        string result = response.Content.ReadAsStringAsync().Result;
-                        //Console.WriteLine(result);
-                
-                        ResponceAuth? responseDeserialize = JsonSerializer.Deserialize<ResponceAuth>(result);
-                        _sessionToken = responseDeserialize?.data.sessionID;
-                    }
-                    else
-                    {
-                        Console.WriteLine("Error: " + response.StatusCode);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Exception: " + ex.Message);
-            }
-        }
-
-        public async Task<string?> GetFirstDate(string cityDerival, double mass, double volume)
-        {
-            const string urlGetFirstDate = "https://api.dellin.ru/v2/request/address/dates.json";
-           
             try
             {
                 using (HttpClient client = new HttpClient())
                 {
-                    RequestGetDateDerival requestData = new RequestGetDateDerival(_apiKey, 
-                        _sessionToken, cityDerival, mass, volume);
-                    
-                    string jsonData = JsonSerializer.Serialize(requestData);
-                    
-                    _httpClient.DefaultRequestHeaders.Accept
-                        .Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-                    var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
-                
-                    HttpResponseMessage response = await client.PostAsync(urlGetFirstDate, content);
-                    //Console.WriteLine(response);
+                    StringContent content = new StringContent(jsonRequestData, Encoding.UTF8, "application/json");
+                    HttpResponseMessage response = await client.PostAsync(urlRequest, content);
                     
                     if (response.IsSuccessStatusCode)
                     {
-                        string result = response.Content.ReadAsStringAsync().Result;
-                        //Console.WriteLine(result);
-                
-                        ResponceGetDateDerival? responseDeserialize = JsonSerializer.Deserialize<ResponceGetDateDerival>(result);
+                        return response.Content.ReadAsStringAsync().Result;
+                    }
 
-                        if (responseDeserialize != null) return responseDeserialize.data.dates[0];
-                    }
-                    else
-                    {
-                        Console.WriteLine("Error: " + response.StatusCode);
-                    }
+                    Console.WriteLine("Error: " + response.StatusCode);
+
                 }
-                
             }
             catch (Exception e)
             {
@@ -108,49 +41,57 @@ namespace api_Delovyi_Linii
             return null;
         }
         
+        public async Task<string?> GetFirstDate(string cityDerival, string mass, string volume)
+        {
+            const string urlGetFirstDate = "https://api.dellin.ru/v2/request/address/dates.json";
+            
+            string jsonContent = $"{{\n   \"appkey\":\"{_apiKey}\",\n   \"delivery\":{{\n      \"deliveryType\":{{\n         \"type\":\"auto\"\n      }},\n      \"derival\":{{\n         \"address\":{{\n            " +
+                                 $"\"search\":\"{cityDerival}\"\n         }}     \n      }}\n   }},\n   \"cargo\":{{\n      \"weight\":0,\n      \"height\":0,\n      \"width\":0,\n      \"length\":0,\n" +
+                                 $"      \"totalVolume\":{volume},\n      \"totalWeight\":{mass}\n   }}\n}}";
+           
+            string? responce = await Request(urlGetFirstDate, jsonContent);
+            
+            string pattern = "\"dates\":\\[\"(.*?)\"";
+            if (responce != null)
+            {
+                Match match = Regex.Match(responce, pattern);
+                if (match.Success)
+                {
+                    return match.Groups[1].Value;
+                }
+            }
+            
+            return null;
+        }
+
         public async Task<double?> CalculatePrice(string cityArrival, double mass, double volume)
         {
             const string urlCalculator = "https://api.dellin.ru/v2/calculator.json";
-            string? firstDate = await GetFirstDate("г. Чайковский, ул. Промышленная, 8/25", mass, volume);
+            string massStr = mass.ToString(CultureInfo.InvariantCulture);
+            string volumeStr = volume.ToString(CultureInfo.InvariantCulture);
+            string? firstDate = await GetFirstDate("г. Чайковский, ул. Промышленная, 8/25", massStr, volumeStr);
+
+            string jsonContent =
+                $"{{\n   \"appkey\":\"{_apiKey}\",\n   \"delivery\":{{\n      \"deliveryType\":{{\n         \"type\":\"auto\"\n      }},\n      \"arrival\":{{\n         \"variant\":\"address\",\n         \"address\":{{\n            " +
+                $"\"search\":\"{cityArrival}\"\n         }},\n        \"time\":{{\n            \"worktimeStart\":\"08:00\",\n            \"worktimeEnd\":\"17:00\"\n         }}\n      }},\n      \"derival\":{{\n        " +
+                $"\"produceDate\":\"{firstDate}\",\n         \"variant\":\"address\",\n         \"address\":{{\n            " +
+                $"\"search\":\"г. Чайковский, ул. Промышленная, 8/25\"\n         }},\n        \"time\":{{\n            \"worktimeStart\":\"08:00\",\n            \"worktimeEnd\":\"17:00\"\n         }}\n      }}\n   }},\n   " +
+                $"\"cargo\":{{\n     \"length\":0,\n      \"width\":0,\n      \"height\":0,\n      " +
+                $"\"totalVolume\":{volumeStr},\n      \"totalWeight\":{massStr},\n      \"hazardClass\":0\n   }}\n}}";
             
-            try
+            string? responce = await Request(urlCalculator, jsonContent);
+            
+            string pattern = "]},\"price\":(.*?),\"";
+            if (responce != null)
             {
-                using (HttpClient client = new HttpClient())
+                Match match = Regex.Match(responce, pattern);
+                if (match.Success)
                 {
-                    RequestCalculatePrice requestData = new RequestCalculatePrice(_apiKey, _sessionToken,
-                        cityArrival, "г. Чайковский, ул. Промышленная, 8/25", firstDate, mass, volume);
-                    
-                    string jsonData = JsonSerializer.Serialize(requestData);
-                    Console.WriteLine(jsonData);
-                    _httpClient.DefaultRequestHeaders.Accept
-                        .Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-                    var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
-                
-                    HttpResponseMessage response = await client.PostAsync(urlCalculator, content);
-                    
-                    if (response.IsSuccessStatusCode)
-                    {
-                        string result = response.Content.ReadAsStringAsync().Result;
-                        
-                
-                        ResponceCalculatePrice? responseDeserialize = JsonSerializer.Deserialize<ResponceCalculatePrice>(result);
-                        if (responseDeserialize != null) return responseDeserialize.data.price;
-                    }
-                    else
-                    {
-                        Console.WriteLine("Error: " + response.StatusCode);
-                    }
-                    
+                    return double.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture);
                 }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
             }
             
             return null;
         }
-        
     }
 }
